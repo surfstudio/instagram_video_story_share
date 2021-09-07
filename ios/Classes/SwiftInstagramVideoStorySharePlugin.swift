@@ -9,50 +9,61 @@ public class SwiftInstagramVideoStorySharePlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    let prefix: String = "instagramVideoShare: "
+
     switch call.method {
-        case "shareVideoToInstagramStories" :
+        case "shareVideoToInstagramStories", "shareVideoToInstagram":
             var resultDictionary: [String: Any] = [:]
             resultDictionary["result"] = false
             resultDictionary["message"] = "Message From Swift: ___"
             guard let args = call.arguments else {
-                print("Unexpected error ARGS HAVE A PROBLEM.")
+                print(prefix + "Unexpected error ARGS HAVE A PROBLEM.")
                 resultDictionary["result"] = false
                 resultDictionary["message"] = "Message From Swift error ARGS HAVE A PROBLEM"
                 result(resultDictionary)
                 return
             }
             let videoPath = args as? String
-            print("videoPath: \(videoPath ?? "unknown")")
-            let instagramUrl = URL(string: "instagram-stories://share")
+            print(prefix + "videoPath - \(videoPath ?? "unknown")")
+            let instagramUrl = URL(string: "instagram://app")
             if UIApplication.shared.canOpenURL(instagramUrl!) {
-                print("Instagram is installed")
+                print(prefix + "Instagram is installed")
                 let documentExists = FileManager.default.fileExists(atPath: videoPath!)
-                print("documentExists: \(documentExists)")
+                print(prefix + "documentExists - \(documentExists)")
                 if(documentExists) {
                     do {
                         let video = try NSData(contentsOfFile: videoPath!, options: .mappedIfSafe)
                         var pasterboardItems:[[String:Any]]? = nil
                         pasterboardItems = [["com.instagram.sharedSticker.backgroundVideo": video as Any]]
                         UIPasteboard.general.setItems(pasterboardItems!)
-                        UIApplication.shared.open(instagramUrl!)
+                        var url: URL?
+                        switch call.method {
+                            case "shareVideoToInstagramStories" :
+                                url = URL(string: "instagram-stories://share")
+                            case "shareVideoToInstagram" :
+                                url = URL(string: "instagram://library?LocalIdentifier=" + videoPath!)
+                            default :
+                                result(FlutterMethodNotImplemented)
+                        }
+                        UIApplication.shared.open(url!)
                         resultDictionary["result"] = true
                         resultDictionary["message"] = "Message From Swift \(videoPath ?? "unknown")"
                     } catch {
-                        print("Unexpected error converting to NSDATA: \(error).")
+                        print(prefix + "Unexpected error converting to NSDATA - \(error).")
                         resultDictionary["result"] = false
                         resultDictionary["message"] = "Message From Swift error converting to NSDATA"
                     }
                 } else {
-                    print("Unexpected error DOCUMENT DOES NOT EXIST.")
+                    print(prefix + "Unexpected error DOCUMENT DOES NOT EXIST.")
                     resultDictionary["result"] = false
                     resultDictionary["message"] = "Message From Swift error DOCUMENT DOES NOT EXIST"
                 }
             } else {
-                print("Instagram is not installed")
+                print(prefix + "Instagram is not installed")
                 resultDictionary["result"] = false
                 resultDictionary["message"] = "Message From Swift INSTAGRAM NOT INSTALLED"
             }
-            print("resultDictionary: \(resultDictionary)")
+            print(prefix + "resultDictionary - \(resultDictionary)")
             result(resultDictionary)
         case "isInstagramInstalled" :
             let instagramUrl = URL(string: "instagram-stories://share")
