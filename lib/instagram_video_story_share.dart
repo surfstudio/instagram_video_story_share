@@ -22,7 +22,7 @@ class InstagramVideoStoryShare {
 
   static Future<bool> shareVideoToInstagram({required String videoPath}) async {
     Map<dynamic, dynamic> sharedMap =
-        await _channel.invokeMethod('shareVideoToInstagramStories', videoPath);
+        await _channel.invokeMethod('shareVideoToInstagram', videoPath);
     bool isShared = sharedMap["result"] as bool;
     return isShared;
   }
