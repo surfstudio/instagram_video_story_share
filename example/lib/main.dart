@@ -96,7 +96,9 @@ class _MyAppState extends State<MyApp> {
             print("videoPath: $videoPath");
             try {
               bool result =
-                  await InstagramVideoStoryShare.share(videoPath: videoPath);
+                  await InstagramVideoStoryShare.shareVideoToInstagram(
+                videoPath: videoPath,
+              );
               print("result: $result");
               if (!mounted) return;
               setState(() {
